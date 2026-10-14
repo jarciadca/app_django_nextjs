@@ -1,0 +1,58 @@
+# --- Python / Django ---
+# Bytecode compilado de Python (se regenera, no se versiona)
+__pycache__/
+# Archivos .pyc / .pyo / .pyd compilados
+*.py[cod]
+# Distribuciones empaquetadas
+*.egg-info/
+# Entornos virtuales
+.venv/
+venv/
+env/
+# Carpeta de build
+build/
+dist/
+
+# --- Django ---
+# Base de datos SQLite local (no la usamos, pero por si acaso)
+*.sqlite3
+# Archivos estáticos recogidos por collectstatic
+/backend/staticfiles/
+# Archivos subidos por usuarios (PDFs, fotos) — no van al repo
+/backend/media/
+
+# --- Entorno ---
+# Variables de entorno reales (JAMÁS al repo)
+.env
+.env.local
+.env.*.local
+
+# --- Node / Next.js ---
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+# Logs de npm/yarn/pnpm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Testing / Coverage ---
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.ruff_cache/
+.mypy_cache/
+
+# --- Editores / SO ---
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Docker (por si luego añadimos) ---
+*.pid
