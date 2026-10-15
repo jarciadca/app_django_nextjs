@@ -12,7 +12,6 @@ Monorepo con dos aplicaciones independientes que se comunican vía HTTP/JSON:
 Organizamos el backend por **feature** (vertical slice), y dentro de cada
 feature separamos capas (hexagonal pragmático):
 
-
 backend/
 ├── config/ # settings, urls raíz, wsgi/asgi
 ├── shared/ # kernel compartido (errores, paginación, permisos)
@@ -50,6 +49,7 @@ text
 - Logging estructurado con `structlog` (se añade en Fase 2).
 
 ## Frontend: App Router + features
+
 frontend/
 ├── app/ # rutas (App Router)
 ├── components/ # UI reutilizable (shadcn/ui)

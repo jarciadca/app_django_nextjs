@@ -1,9 +1,4 @@
-# ============================================================
-# Workflow que valida que el título de cada Pull Request
-# siga Conventional Commits (feat:, fix:, chore:, docs:...).
-# Solo se ejecuta en PRs (no en push directo).
-# ============================================================
-
+---
 name: Conventional Commits
 
 on:
