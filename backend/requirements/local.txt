@@ -1,0 +1,20 @@
+# ============================================================
+# Dependencias solo para desarrollo local.
+# ============================================================
+
+# Hereda todo lo de base.txt.
+-r base.txt
+
+# --- Testing ---
+pytest==8.3.4
+pytest-django==4.9.0
+pytest-cov==6.0.0
+
+# --- Calidad de código ---
+ruff==0.8.4
+black==24.10.0
+mypy==1.13.0
+django-stubs==5.1.1
+
+# Stubs oficiales de DRF (mantenidos por TypedDjango).
+djangorestframework-stubs==3.15.3

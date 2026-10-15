@@ -1,0 +1,13 @@
+# ============================================================
+# Dependencias solo para CI / test.
+# ============================================================
+
+-r base.txt
+
+pytest==8.3.4
+pytest-django==4.9.0
+pytest-cov==6.0.0
+# Stubs también en CI para que mypy no falle.
+django-stubs==5.1.1
+djangorestframework-stubs==3.15.3
+mypy==1.13.0

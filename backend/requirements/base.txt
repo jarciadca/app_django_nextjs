@@ -1,0 +1,24 @@
+# ============================================================
+# Dependencias comunes a TODOS los entornos.
+# ============================================================
+
+# Framework web principal.
+Django==5.1.4
+
+# Toolkit para construir APIs REST sobre Django.
+djangorestframework==3.15.2
+
+# Autenticación JWT para DRF (access + refresh tokens).
+djangorestframework-simplejwt==5.3.1
+
+# Filtros de queryset para DRF (?estado=borrador&autor=3).
+django-filter==24.3
+
+# CORS: permite que el frontend (puerto 3000) llame al backend (8000).
+django-cors-headers==4.6.0
+
+# Carga de variables de entorno desde .env.
+django-environ==0.11.2
+
+# Driver de PostgreSQL para Python (recomendado por Django).
+psycopg[binary]==3.2.3

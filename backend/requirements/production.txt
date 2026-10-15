@@ -1,0 +1,11 @@
+# ============================================================
+# Dependencias solo para producción.
+# ============================================================
+
+-r base.txt
+
+# Servidor WSGI para producción.
+gunicorn==23.0.0
+
+# Logging estructurado en JSON.
+structlog==24.4.0
