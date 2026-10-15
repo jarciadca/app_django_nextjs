@@ -1,0 +1,22 @@
+{
+  "//": "Reglas de markdownlint para el proyecto. Cada clave activa/desactiva una regla.",
+  "//MD013": "Ignoramos la regla de longitud máxima de línea (MD013) porque",
+  "//MD013b": "en documentación técnica es común tener URLs y tablas largas.",
+  "MD013": false,
+
+  "//MD033": "Permitimos HTML inline (útil para badges, tablas complejas, etc.).",
+  "MD033": false,
+
+  "//MD041": "No exigimos que la primera línea sea un H1, porque algunos docs",
+  "//MD041b": "empiezan con un frontmatter o un comentario.",
+  "MD041": false,
+
+  "//MD024": "Permitimos headings repetidos en distintas secciones del mismo doc",
+  "//MD024b": "(ej. 'Uso' en varios apartados).",
+  "MD024": {
+    "siblings_only": true
+  },
+
+  "//default": "El resto de reglas por defecto se mantienen activas.",
+  "default": true
+}

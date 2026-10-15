@@ -1,0 +1,53 @@
+# ============================================================
+# Workflow que valida que el título de cada Pull Request
+# siga Conventional Commits (feat:, fix:, chore:, docs:...).
+# Solo se ejecuta en PRs (no en push directo).
+# ============================================================
+
+name: Conventional Commits
+
+on:
+  # Solo se dispara en pull requests.
+  pull_request:
+    # Solo cuando el PR se abre, se reabre o se edita el título.
+    types: [opened, edited, reopened, synchronize]
+    branches: [main]
+
+permissions:
+  # Necesitamos leer el PR para acceder a su título.
+  pull-requests: read
+
+jobs:
+  validate-title:
+    name: Validar título del PR
+    runs-on: ubuntu-latest
+
+    steps:
+      # Usamos una acción de la comunidad que ya implementa la validación.
+      # Es más robusto que escribir el regex a mano.
+      - name: Validar título con amannn/action-semantic-pull-request
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          # Token que la acción usa para leer el PR.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Tipos permitidos al inicio del título.
+          types: |
+            feat
+            fix
+            docs
+            chore
+            test
+            refactor
+            perf
+            ci
+            build
+            style
+            revert
+          # Exigimos que el scope sea opcional pero si aparece, entre paréntesis.
+          requireScope: false
+          # Mensaje de error personalizado si el título no cumple.
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            El título del PR debe empezar en minúscula después del tipo.
+            Ejemplo válido: "feat(usuarios): añadir registro con email"
