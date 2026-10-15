@@ -1,69 +1,58 @@
 ---
+# ============================================================
+# CI: valida estructura, lint de Markdown/YAML y backend Python.
+# Se ejecuta en push a main y a ramas feat/*, y en PRs hacia main.
+# ============================================================
+
 name: CI
 
-# Disparadores del workflow.
 on:
-  # Se ejecuta en cada push...
+  # Push a main (por si alguien mergea) y a ramas de feature.
   push:
-    # ...pero solo en la rama main (no en ramas de feature sueltas).
-    branches: [main]
-  # Se ejecuta en cada pull request...
+    branches:
+      - main
+      - 'feat/**'
+      - 'fix/**'
+  # PRs que apunten a main.
   pull_request:
-    # ...que apunte a main.
     branches: [main]
 
-# Permisos mínimos que el workflow necesita del token de GitHub.
-# "contents: read" basta para hacer checkout del repo.
+# Permisos mínimos.
 permissions:
   contents: read
 
 jobs:
   # ----------------------------------------------------------
-  # JOB 1: Validar la estructura del repositorio.
-  # Comprueba que los archivos obligatorios existen.
+  # JOB 1: Validar estructura del repositorio.
   # ----------------------------------------------------------
   repo-structure:
-    # Nombre legible del job que verás en GitHub.
     name: Validar estructura del repo
-    # Sistema operativo del runner.
     runs-on: ubuntu-latest
-
     steps:
-      # Descarga el contenido del repositorio en el runner.
       - name: Checkout del código
         uses: actions/checkout@v4
 
-      # Verifica que los archivos clave existen.
-      # Si falta alguno, el step falla y con él todo el job.
       - name: Verificar archivos obligatorios
         run: |
-          # Lista de archivos que DEBEN existir en la raíz o en rutas conocidas.
           archivos=(
             "README.md"
             ".gitignore"
             ".env.example"
             "docs/architecture.md"
+            "backend/manage.py"
+            "backend/requirements/base.txt"
+            "backend/pyproject.toml"
           )
-          # Iteramos sobre cada archivo.
           for archivo in "${archivos[@]}"; do
-            # -f comprueba que existe y es un archivo regular.
             if [ ! -f "$archivo" ]; then
-              # Mensaje de error claro en el log del workflow.
               echo "::error::Falta el archivo obligatorio: $archivo"
-              # Salida con código de error para que el step falle.
               exit 1
             fi
-            # Si existe, lo registramos como info.
             echo "OK: $archivo existe"
           done
-          # Si llegamos aquí, todos existen.
-          echo "Todos los archivos obligatorios están presentes."
 
-      # Verifica que .env NO está versionado (debe estar en .gitignore).
       - name: Verificar que .env no está versionado
         run: |
-          # git ls-files lista los archivos versionados.
-          # grep busca ".env" exacto como línea.
           if git ls-files --error-unmatch .env > /dev/null 2>&1; then
             echo "::error::El archivo .env está versionado. Debe estar en .gitignore."
             exit 1
@@ -72,27 +61,21 @@ jobs:
 
   # ----------------------------------------------------------
   # JOB 2: Lint de Markdown.
-  # Usa markdownlint-cli vía npx (Node ya está disponible en el runner).
   # ----------------------------------------------------------
   markdown-lint:
     name: Lint de Markdown
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout del código
         uses: actions/checkout@v4
 
-      # Instala Node 20 en el runner (ya viene, pero fijamos versión explícita).
       - name: Configurar Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # Ejecuta markdownlint sobre todos los .md del repo.
       - name: Ejecutar markdownlint
         run: |
-          # --config apunta al archivo de reglas.
-          # El último argumento es el patrón de archivos a lintear.
           npx --yes markdownlint-cli@0.42.0 \
             --config .markdownlint.json \
             "**/*.md" \
@@ -100,33 +83,100 @@ jobs:
             --ignore .git
 
   # ----------------------------------------------------------
-  # JOB 3: Validar sintaxis de todos los YAML del repo.
-  # Detecta errores tipográficos en workflows y otros YAML.
+  # JOB 3: Lint de YAML.
   # ----------------------------------------------------------
   yaml-lint:
     name: Lint de YAML
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar yamllint
+        run: |
+          python -m pip install --upgrade pip
+          pip install yamllint==1.35.1
+
+      - name: Ejecutar yamllint
+        run: yamllint --strict .
+
+  # ----------------------------------------------------------
+  # JOB 4: Backend Python (ruff + black + mypy + pytest).
+  # ----------------------------------------------------------
+  backend:
+    name: Backend Python
+    runs-on: ubuntu-latest
+
+    # Servicio PostgreSQL temporal para los tests.
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_DB: app_db
+          POSTGRES_USER: app_user
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        # Espera a que PostgreSQL esté listo antes de continuar.
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    # Variables de entorno para Django en CI.
+    env:
+      DJANGO_SECRET_KEY: ci-secret-key-no-usar-en-produccion
+      DJANGO_DEBUG: 'False'
+      DJANGO_ALLOWED_HOSTS: 'localhost,127.0.0.1'
+      DJANGO_ENV: test
+      POSTGRES_DB: app_db
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: '5432'
 
     steps:
       - name: Checkout del código
         uses: actions/checkout@v4
 
-      - name: Configurar Node.js 20
-        uses: actions/setup-node@v4
+      - name: Configurar Python 3.12
+        uses: actions/setup-python@v5
         with:
-          node-version: '20'
+          python-version: '3.12'
+          cache: 'pip'
 
-      # Instala yamllint vía pip (Python ya viene en el runner ubuntu-latest).
-      - name: Instalar yamllint
+      - name: Instalar dependencias
+        working-directory: backend
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install yamllint==1.35.1
+          python -m pip install --upgrade pip wheel setuptools
+          pip install -r requirements/test.txt
 
-      # Ejecuta yamllint con configuración relajada para GitHub Actions.
-      # Los workflows de GitHub a veces tienen líneas largas y valores sin comillas,
-      # así que relajamos esas reglas específicamente.
-      - name: Ejecutar yamllint
-        run: |
-          yamllint --strict \
-            -d "{extends: default, rules: {line-length: {max: 140}, truthy: {allowed-values: ['true', 'false', 'on']}}}" \
-            .github/
+      - name: Ruff lint
+        working-directory: backend
+        run: ruff check .
+
+      - name: Ruff format check
+        working-directory: backend
+        run: ruff format --check .
+
+      - name: Black check
+        working-directory: backend
+        run: black --check .
+
+      - name: Mypy
+        working-directory: backend
+        run: mypy .
+
+      - name: Django check
+        working-directory: backend
+        run: python manage.py check --settings=config.settings.test
+
+      - name: Pytest
+        working-directory: backend
+        run: pytest

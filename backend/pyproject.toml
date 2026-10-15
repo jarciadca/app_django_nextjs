@@ -1,0 +1,79 @@
+# ============================================================
+# Configuración de herramientas Python del backend.
+# Target: Python 3.12 (por compatibilidad garantizada con Django 5.1).
+# ============================================================
+
+[tool.ruff]
+# Versión objetivo de Python.
+target-version = "py312"
+# Longitud máxima de línea.
+line-length = 100
+# Carpetas excluidas.
+exclude = [".venv", "migrations", "__pycache__", "staticfiles", "media"]
+
+[tool.ruff.lint]
+# Reglas: pycodestyle (E/W), pyflakes (F), isort (I), bugbear (B),
+# comprehensions (C4), pyupgrade (UP), simplify (SIM), naming (N).
+select = ["E", "W", "F", "I", "B", "C4", "UP", "SIM", "N"]
+# E501 la gestiona black.
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+# Paquetes propios del proyecto.
+known-first-party = ["config", "shared", "features"]
+
+[tool.ruff.lint.per-file-ignores]
+# En settings permitimos `from .base import *` sin avisos.
+"config/settings/*.py" = ["F403", "F405"]
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+exclude = '/(\.venv|migrations)/'
+
+[tool.pytest.ini_options]
+# Dónde buscar tests.
+testpaths = ["shared", "features"]
+# Patrones de tests.
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+# Añade la raíz del backend al sys.path.
+pythonpath = ["."]
+# Settings de Django para tests.
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+# Opciones por defecto.
+addopts = "-ra --strict-markers --cov=shared --cov=features --cov-report=term-missing --cov-fail-under=70"
+# Marcadores personalizados.
+markers = [
+    "slow: tests que tardan más de 1 segundo",
+    "integration: tests que tocan la base de datos",
+]
+
+[tool.coverage.run]
+# Medimos ramas (if/else).
+branch = true
+# Omisiones.
+omit = ["*/migrations/*", "*/tests/*", "*/__init__.py", "manage.py", "config/*"]
+
+[tool.mypy]
+python_version = "3.12"
+# Modo estricto.
+strict = true
+exclude = ["migrations/"]
+plugins = [
+    "mypy_django_plugin.main",
+    "mypy_drf_plugin.main",
+]
+
+# Módulos sin stubs: silenciamos el error import-untyped.
+# Es una concesión pragmática: DRF y environ no publican py.typed.
+[[tool.mypy.overrides]]
+module = [
+    "rest_framework.*",
+    "environ.*",
+]
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "config.settings.test"
