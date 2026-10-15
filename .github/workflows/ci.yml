@@ -1,3 +1,4 @@
+---
 # ============================================================
 # CI: valida estructura, lint de Markdown/YAML y backend Python.
 # Se ejecuta en push a main y a ramas feat/*, y en PRs hacia main.
@@ -102,10 +103,7 @@ jobs:
           pip install yamllint==1.35.1
 
       - name: Ejecutar yamllint
-        run: |
-          yamllint --strict \
-            -d "{extends: default, rules: {line-length: {max: 120}, truthy: {allowed-values: ['true', 'false', 'on']}}}" \
-            .github/
+        run: yamllint --strict .
 
   # ----------------------------------------------------------
   # JOB 4: Backend Python (ruff + black + mypy + pytest).
