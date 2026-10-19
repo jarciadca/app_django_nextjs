@@ -11,4 +11,6 @@ urlpatterns = [
     # Rutas del módulo shared (health check).
     path("api/", include("shared.infrastructure.urls")),
     # Aquí se añadirán las rutas de cada feature en fases siguientes.
+    # Autenticación de usuarios.
+    path("api/auth/", include("features.usuarios.infrastructure.urls")),
 ]
