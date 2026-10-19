@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "corsheaders",  # CORS para el frontend.
     # Apps propias: se añadirán por feature en fases siguientes.
     "features.usuarios.infrastructure.apps.UsuariosConfig",
+    "features.autores.infrastructure.apps.AutoresConfig",
 ]
 
 
