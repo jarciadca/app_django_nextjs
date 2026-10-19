@@ -22,3 +22,6 @@ django-environ==0.11.2
 
 # Driver de PostgreSQL para Python (recomendado por Django).
 psycopg[binary]==3.2.3
+
+# Procesamiento de imágenes (requerido por ImageField).
+Pillow==11.0.0
