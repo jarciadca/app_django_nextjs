@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     "rest_framework",  # DRF: APIs REST.
     "corsheaders",  # CORS para el frontend.
     # Apps propias: se añadirán por feature en fases siguientes.
+    "features.usuarios.infrastructure.apps.UsuariosConfig",
 ]
 
 
@@ -206,3 +207,106 @@ CORS_ALLOWED_ORIGINS: list[str] = []
 
 # Permite que el frontend envíe cookies (para refresh token httpOnly).
 CORS_ALLOW_CREDENTIALS = True
+
+
+# ============================================================
+# MODELO DE USUARIO PERSONALIZADO
+# ============================================================
+
+# Django exige que, si usas un User model propio, lo declares ANTES de la primera migración.
+# Cambiarlo después es muy doloroso. Lo hacemos aquí desde el primer día.
+AUTH_USER_MODEL = "usuarios.Usuario"
+
+
+# ============================================================
+# DJANGO REST FRAMEWORK — EXCEPTION HANDLER
+# ============================================================
+
+# Sustituimos el handler por defecto de DRF por el nuestro, que traduce
+# DomainError a problem+json y loggea bugs con traceback.
+REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "shared.infrastructure.exception_handler.custom_exception_handler",
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 20,
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
+    ],
+}
+
+
+# ============================================================
+# SIMPLE JWT — CONFIGURACIÓN
+# ============================================================
+
+from datetime import timedelta  # noqa: E402
+
+SIMPLE_JWT = {
+    # Access token: vida corta (15 min) porque va en memoria del frontend.
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    # Refresh token: vida larga (7 días) porque va en cookie httpOnly.
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    # Rotación: cada refresh emite un nuevo refresh token (más seguro).
+    "ROTATE_REFRESH_TOKENS": True,
+    # Al rotar, invalidamos el refresh anterior (requiere app token_blacklist).
+    "BLACKLIST_AFTER_ROTATION": True,
+    # Algoritmo de firma.
+    "ALGORITHM": "HS256",
+    # Firma con SECRET_KEY del proyecto.
+    "SIGNING_KEY": SECRET_KEY,
+    # Nombre del header que llevará el access token.
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    # Claims del token (podemos añadir datos extra del usuario).
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    # No incluir el token "jti" en el access (no lo necesitamos).
+    "JTI_CLAIM": "jti",
+    # Nombre de la cookie donde pondremos el refresh token.
+    "AUTH_COOKIE": "refresh_token",
+    # Path de la cookie: solo se envía a endpoints bajo /api/auth/.
+    "AUTH_COOKIE_PATH": "/api/auth/",
+    # HttpOnly: JS no puede leerla (a prueba de XSS).
+    "AUTH_COOKIE_HTTP_ONLY": True,
+    # SameSite: Lax (no se envía en POST cross-site → protege de CSRF).
+    "AUTH_COOKIE_SAMESITE": "Lax",
+    # Secure: en base False; en producción.py lo forzamos a True.
+    "AUTH_COOKIE_SECURE": False,
+}
+
+
+# ============================================================
+# LOGGING ESTRUCTURADO
+# ============================================================
+
+LOGGING = {
+    "version": 1,
+    # Desactiva loggers preexistentes (los nuestros sustituyen).
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "[{asctime}] {levelname} {name} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        # Logger propio para errores de API.
+        "api.errors": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}
