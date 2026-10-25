@@ -56,3 +56,4 @@ Thumbs.db
 
 # --- Docker (por si luego añadimos) ---
 *.pid
+api.http
