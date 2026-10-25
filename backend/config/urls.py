@@ -17,6 +17,9 @@ urlpatterns = [
     path("api/auth/", include("features.usuarios.infrastructure.urls")),
     # Autores.
     path("api/autores/", include("features.autores.infrastructure.urls")),
+    # Revistas (Fase 4b).
+    # API: expone /api/revistas/ y /api/revistas/<uuid>/.
+    path("api/revistas/", include("features.revistas.infrastructure.urls")),
 ]
 
 # En desarrollo servimos los archivos media (fotos de autores).

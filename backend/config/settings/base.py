@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     # Apps propias: se añadirán por feature en fases siguientes.
     "features.usuarios.infrastructure.apps.UsuariosConfig",
     "features.autores.infrastructure.apps.AutoresConfig",
+    "features.revistas.infrastructure.apps.RevistasConfig",
 ]
 
 
