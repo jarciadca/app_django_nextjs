@@ -88,7 +88,7 @@ class DjangoRevistaRepository:
     # API: sirve GET /api/revistas/
     #      Acepta querystring: ?search=, ?ordering=, ?page=, ?page_size=
     # ═══════════════════════════════════════════════════════════════
-    def list(
+    def list_all(
         self,
         *,
         search: str | None = None,

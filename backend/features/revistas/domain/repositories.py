@@ -29,7 +29,7 @@ class RevistaRepository(Protocol):
     debe ofrecer estos 6 métodos con estas firmas exactas.
     """
 
-    def list(
+    def list_all(
         self,
         *,
         search: str | None = None,

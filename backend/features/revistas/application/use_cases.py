@@ -141,7 +141,7 @@ class ListarRevistasUseCase:
         offset = (page - 1) * page_size
 
         # Delegamos en el repositorio (que aplica search + ordering + paginación).
-        items, total = self._repo.list(
+        items, total = self._repo.list_all(
             search=search,
             ordering=ordering,
             offset=offset,

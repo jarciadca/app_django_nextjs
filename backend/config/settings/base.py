@@ -68,6 +68,8 @@ INSTALLED_APPS = [
     "features.usuarios.infrastructure.apps.UsuariosConfig",
     "features.autores.infrastructure.apps.AutoresConfig",
     "features.revistas.infrastructure.apps.RevistasConfig",
+    # NUEVA: app categorias (Fase 4b)
+    "features.categorias.infrastructure.apps.CategoriasConfig",
 ]
 
 
